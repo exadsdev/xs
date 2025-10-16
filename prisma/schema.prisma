@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Destination {
+  id           String   @id @default(cuid())
+  name         String
+  type         String   @default("PAGE") // "PAGE" | "GROUP"
+  fbId         String   // page id หรือ group id (เช่น 123456 หรือ username)
+  accessToken  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DailyTemplate {
+  id        String   @id @default(cuid())
+  title     String   @default("Default Daily Plan")
+  timezone  String   @default("Asia/Bangkok")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  slots     Slot[]
+}
+
+model Slot {
+  id          String   @id @default(cuid())
+  templateId  String
+  index       Int      // 1..10
+  enabled     Boolean  @default(false)
+  timeHHMM    String   // "09:00"
+  message     String
+  imageUrl    String?
+  linkUrl     String?
+  destinationId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  template    DailyTemplate @relation(fields: [templateId], references: [id])
+}
+
+model PostLog {
+  id          String   @id @default(cuid())
+  ranAt       DateTime @default(now())
+  slotId      String?
+  fbPostId    String?
+  status      String   // SUCCESS | FAILED
+  error       String?
+}
